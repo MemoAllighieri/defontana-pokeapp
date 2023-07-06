@@ -1,0 +1,393 @@
+<main>
+  <div
+    class="container mx-auto my-8 flex min-[320px]:flex-col sm:flex-col md:flex-row"
+  >
+    <div class="min-[320px]:w-full sm:w-full md:w-2/3 px-5">
+      <div class="relative">
+        <div class="relative w-full">
+          <input
+            type="text"
+            class="w-full px-4 py-2 pr-10 text-gray-700 bg-gray-100 rounded-md focus:outline-none"
+            placeholder="Buscar Pokemon..."
+            [formControl]="searchControl"
+            (focus)="onFocusFilterControl()"
+          />
+          <button
+            type="button"
+            class="absolute inset-y-0 right-0 flex items-center pr-3"
+            (click)="selectPokemonFilter('')"
+          >
+            <svg
+              class="feather feather-x w-5 h-5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-700"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <line x1="18" x2="6" y1="6" y2="18" />
+              <line x1="6" x2="18" y1="6" y2="18" />
+            </svg>
+          </button>
+          <ul
+            class="absolute z-10 w-full bg-white rounded-md shadow-lg"
+            *ngIf="filteredPokemonListView"
+          >
+            <li
+              class="px-4 py-2 cursor-pointer hover:bg-gray-100"
+              *ngFor="let pokemon of filteredPokemonList"
+              (click)="selectPokemonFilter(pokemon.name)"
+            >
+              {{ pokemon.name }}
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="relative overflow-x-auto rounded-lg">
+        <table class="min-w-full mt-2">
+          <thead>
+            <tr
+              class="border bg-gray-50 dark:bg-gray-500 dark:border-gray-400 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            >
+              <th class="px-4 py-2">Nombre del Pokemon</th>
+              <th class="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border" *ngFor="let pokemon of ListPokemonTMP">
+              <td class="bg-white py-2 text-center align-middle">
+                {{ pokemon.name }}
+              </td>
+              <td class="bg-white px-4 py-2 text-center align-middle">
+                <button class="" (click)="selectPokemon(pokemon.name)">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="1em"
+                    viewBox="0 0 576 512"
+                  >
+                    <path
+                      d="M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z"
+                    />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div
+        class="flex items-center justify-between border border-gray-200 bg-white px-4 py-3 sm:px-6 mt-2 rounded-lg"
+      >
+        <div class="flex flex-1 justify-between sm:hidden">
+          <button
+            (click)="prevPage()"
+            [disabled]="page === 1"
+            class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Previous
+          </button>
+          <button
+            (click)="nextPage()"
+            [disabled]="page === totalPages"
+            class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Next
+          </button>
+        </div>
+        <div
+          class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between"
+        >
+          <div>
+            <p class="text-sm text-gray-700">
+              Mostrando pagina
+              <span class="font-medium">{{ page }}</span>
+              de
+              <span class="font-medium">{{ totalPages }}</span>
+              registros
+            </p>
+          </div>
+          <div>
+            <nav
+              class="isolate inline-flex -space-x-px rounded-md shadow-sm"
+              aria-label="Pagination"
+            >
+              <button
+                (click)="prevPage()"
+                [disabled]="page === 1"
+                class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              >
+                <span class="sr-only">Previous</span>
+                <svg
+                  class="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+              <button
+                *ngIf="!(page - 2 < 1)"
+                (click)="changePage(page - 2)"
+                class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              >
+                {{ page - 2 }}
+              </button>
+              <button
+                *ngIf="!(page - 1 < 1)"
+                (click)="changePage(page - 1)"
+                class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              >
+                {{ page - 1 }}
+              </button>
+              <button
+                aria-current="page"
+                class="relative z-10 inline-flex items-center bg-gray-500 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                {{ page }}
+              </button>
+              <button
+                *ngIf="!(page + 1 > totalPages)"
+                (click)="changePage(page + 1)"
+                class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              >
+                {{ page + 1 }}
+              </button>
+              <button
+                *ngIf="!(page + 2 > totalPages)"
+                (click)="changePage(page + 2)"
+                class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              >
+                {{ page + 2 }}
+              </button>
+              <button
+                (click)="nextPage()"
+                [disabled]="page === totalPages"
+                class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+              >
+                <span class="sr-only">Next</span>
+                <svg
+                  class="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="min-[320px]:w-full sm:w-full md:w-1/3 px-5 min-[320px]:mt-2 sm:mt-2">
+      <div
+        class="bg-gray-100 p-4 rounded-lg overflow-auto"
+        *ngIf="PokemonDetails.id"
+      >
+        <img
+          src="{{
+            PokemonDetails.sprites.other!['official-artwork'].front_default
+          }}"
+          alt="pokemonImage"
+          class="w-full mb-2 rounded-lg"
+        />
+        <h1 class="text-xl font-bold text-gray-800">
+          {{ PokemonDetails.name }}
+        </h1>
+        <button
+          [disabled]="true"
+          *ngFor="let type of PokemonDetails.types"
+          [ngClass]="[
+            'text-gray-900',
+            'bg-[' + getColorByType(type.type.name) + ']',
+            'border',
+            'border-gray-300',
+            'focus:outline-none',
+            'focus:ring-4',
+            'focus:ring-gray-200',
+            'font-medium',
+            'rounded-full',
+            'text-sm',
+            'px-5',
+            'py-2.5',
+            'mr-2',
+            'mb-2',
+            'dark:bg-gray-800',
+            'dark:text-white',
+            'dark:border-gray-600',
+            'dark:hover:bg-gray-700',
+            'dark:hover:border-gray-600',
+            'dark:focus:ring-gray-700'
+          ]"
+        >
+          {{ type.type.name }}
+        </button>
+        <h3 class="text-xl font-bold text-gray-800 mt-3">General</h3>
+        <table>
+          <tr>
+            <td class="text-gray-600 font-bold">Número de pokedex :</td>
+            <td class="pl-3">{{ PokemonDetails.order }}</td>
+          </tr>
+          <tr>
+            <td class="text-gray-600 font-bold">Altura :</td>
+            <td class="pl-3">
+              {{ PokemonDetails.height | number : "1.1-1" }} m
+            </td>
+          </tr>
+          <tr>
+            <td class="text-gray-600 font-bold">Peso :</td>
+            <td class="pl-3">
+              {{ PokemonDetails.weight | number : "1.1-1" }} kg
+            </td>
+          </tr>
+          <tr>
+            <td class="text-gray-600 font-bold">Experiencia Base :</td>
+            <td class="pl-3">{{ PokemonDetails.base_experience }}</td>
+          </tr>
+        </table>
+        <h3 class="text-xl font-bold text-gray-800 mt-3">Stats</h3>
+        <table>
+          <tr>
+            <td class="text-gray-600 font-bold">Hp :</td>
+            <td class="pl-3">
+              <div class="w-64 h-4 bg-gray-200 rounded">
+                <div
+                  class="h-full bg-blue-500 rounded text-sm flex items-center justify-start font-semibold pl-1"
+                  [ngStyle]="{ width: getStatByName('hp').toString() + '%' }"
+                >
+                  {{ getStatByName("hp") * 2 }}
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="text-gray-600 font-bold">Ataque :</td>
+            <td class="pl-3">
+              <div class="w-64 h-4 bg-gray-200 rounded">
+                <div
+                  class="h-full bg-blue-500 rounded text-sm flex items-center justify-start font-semibold pl-1"
+                  [ngStyle]="{
+                    width: getStatByName('attack').toString() + '%'
+                  }"
+                >
+                  {{ getStatByName("attack") * 2 }}
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="text-gray-600 font-bold">Defensa :</td>
+            <td class="pl-3">
+              <div class="w-64 h-4 bg-gray-200 rounded">
+                <div
+                  class="h-full bg-blue-500 rounded text-sm flex items-center justify-start font-semibold pl-1"
+                  [ngStyle]="{
+                    width: getStatByName('defense').toString() + '%'
+                  }"
+                >
+                  {{ getStatByName("defense") * 2 }}
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="text-gray-600 font-bold">Ataque especial :</td>
+            <td class="pl-3">
+              <div class="w-64 h-4 bg-gray-200 rounded">
+                <div
+                  class="h-full bg-blue-500 rounded text-sm flex items-center justify-start font-semibold pl-1"
+                  [ngStyle]="{
+                    width: getStatByName('special-attack').toString() + '%'
+                  }"
+                >
+                  {{ getStatByName("special-attack") * 2 }}
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="text-gray-600 font-bold">Defensa especial :</td>
+            <td class="pl-3">
+              <div class="w-64 h-4 bg-gray-200 rounded">
+                <div
+                  class="h-full bg-blue-500 rounded text-sm flex items-center justify-start font-semibold pl-1"
+                  [ngStyle]="{
+                    width: getStatByName('special-defense').toString() + '%'
+                  }"
+                >
+                  {{ getStatByName("special-defense") * 2 }}
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="text-gray-600 font-bold">Velocidad :</td>
+            <td class="pl-3">
+              <div class="w-64 h-4 bg-gray-200 rounded">
+                <div
+                  class="h-full bg-blue-500 rounded text-sm flex items-center justify-start font-semibold pl-1"
+                  [ngStyle]="{ width: getStatByName('speed').toString() + '%' }"
+                >
+                  {{ getStatByName("speed") * 2 }}
+                </div>
+              </div>
+            </td>
+          </tr>
+        </table>
+
+        <h3 class="text-xl font-bold text-gray-800 mt-3">Habilidades:</h3>
+        <div>
+          <ul>
+            <li
+              *ngFor="let ability of PokemonDetails.abilities; let i = index"
+              class="list-none flex"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="1em"
+                viewBox="0 0 384 512"
+                style="transform: rotate(90deg)"
+                class="mt-2"
+              >
+                <path
+                  d="M32 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c53 0 96-43 96-96l0-306.7 73.4 73.4c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0l-128 128c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 109.3 160 416c0 17.7-14.3 32-32 32l-96 0z"
+                />
+              </svg>
+              <span class="ml-3 mb-2">{{ ability.ability.name }}</span>
+
+              <span class="italic text-gray-400 mb-2">{{
+                ability.is_hidden ? " (is hidden)" : ""
+              }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="p-4 mx-auto my-8 sm:w-5/6 md:w-5/6 lg:w-2/3 rounded-lg bg-gray-300">
+    <h2 class="text-lg font-semibold mx-auto text-center">
+      Cantidad de pokemones que inician con cada letra del abecedario
+    </h2>
+    <div class="grid grid-cols-12 flex flex-row">
+      <ng-container *ngFor="let count of pokemonCountByLetter">
+        <div class="flex flex-col p-2 mx-auto">
+          <h2 class="text-lg font-semibold mx-auto">{{ count.letter }}</h2>
+          <p>{{ count.count }}</p>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</main>
